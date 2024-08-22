@@ -8,7 +8,7 @@ parameters:
 	checkMissingIterableValueType: false
 	checkGenericClassInNonGenericObjectType: false
 	includes:
-    		- vendor/szepeviktor/phpstan-wordpress/extension.neon
+		- vendor/szepeviktor/phpstan-wordpress/extension.neon
 	parallel:
 		processTimeout: 300.0
 		jobSize: 10
