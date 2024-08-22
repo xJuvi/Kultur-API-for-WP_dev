@@ -4,6 +4,8 @@ parameters:
 		- src
 	fileExtensions:
 		- php
+	excludePaths:
+		- vendor/
 	reportUnmatchedIgnoredErrors: true
 	checkMissingIterableValueType: false
 	checkGenericClassInNonGenericObjectType: false
