@@ -7,11 +7,10 @@ parameters:
 	reportUnmatchedIgnoredErrors: true
 	checkMissingIterableValueType: false
 	checkGenericClassInNonGenericObjectType: false
-	includes:
-		- vendor/szepeviktor/phpstan-wordpress/extension.neon
 	parallel:
 		processTimeout: 300.0
 		jobSize: 10
 		maximumNumberOfProcesses: 4
 		minimumNumberOfJobsPerProcess: 4
-
+includes:
+	- vendor/szepeviktor/phpstan-wordpress/extension.neon
