@@ -282,7 +282,7 @@ class KA4WP_Admin {
 		
 		$selectedApi = get_option('ka4wp_api_receive_eventcategories', '-1') ?: '-1';
 
-		if(empty($selectedApi) || $selectedApi == '-1')
+		if($selectedApi == '-1')
 		{
 			return;
 		}
@@ -309,7 +309,7 @@ class KA4WP_Admin {
 		
 		$selectedApi = get_option('ka4wp_api_receive_impartingareas', '-1') ?: '-1';
 
-		if(empty($selectedApi) || $selectedApi == '-1')
+		if($selectedApi == '-1')
 		{
 			return;
 		}
@@ -336,7 +336,7 @@ class KA4WP_Admin {
 		
 		$selectedApi = get_option('ka4wp_api_receive_partners', '-1') ?: '-1';
 
-		if(empty($selectedApi) || $selectedApi == '-1')
+		if($selectedApi == '-1')
 		{
 			return;
 		}
@@ -804,16 +804,16 @@ class KA4WP_Admin {
 	 */
 	public function ka4wp_register_settings() {
 		
-		register_setting('ka4wp_settings_integrations', 'ka4wp_api_receive_eventcategories', 'ka4wp_settings_validate_integrations');
-		register_setting('ka4wp_settings_integrations', 'ka4wp_api_receive_eventcategories_recurrence', 'ka4wp_settings_validate_integrations');
-		register_setting('ka4wp_settings_integrations', 'ka4wp_api_keep_deleted_eventcategories', 'ka4wp_settings_validate_integrations');
-		register_setting('ka4wp_settings_integrations', 'ka4wp_api_receive_impartingareas', 'ka4wp_settings_validate_integrations');
-		register_setting('ka4wp_settings_integrations', 'ka4wp_api_receive_impartingareas_recurrence', 'ka4wp_settings_validate_integrations');
-		register_setting('ka4wp_settings_integrations', 'ka4wp_api_keep_deleted_impartingareas', 'ka4wp_settings_validate_integrations');
-		register_setting('ka4wp_settings_integrations', 'ka4wp_api_receive_partners', 'ka4wp_settings_validate_integrations');
-		register_setting('ka4wp_settings_integrations', 'ka4wp_api_receive_partners_recurrence', 'ka4wp_settings_validate_integrations');
-		register_setting('ka4wp_settings_integrations', 'ka4wp_api_keep_deleted_partners', 'ka4wp_settings_validate_integrations');
-		register_setting('ka4wp_settings_miscellaneous', 'ka4wp_prevent_deletion', 'ka4wp_settings_validate_integrations', ['default' => 0, 'type' => 'integer']);
+		register_setting('ka4wp_settings_integrations', 'ka4wp_api_receive_eventcategories', ['sanitize_callback' => 'ka4wp_settings_validate_integrations']);
+		register_setting('ka4wp_settings_integrations', 'ka4wp_api_receive_eventcategories_recurrence', ['sanitize_callback' => 'ka4wp_settings_validate_integrations']);
+		register_setting('ka4wp_settings_integrations', 'ka4wp_api_keep_deleted_eventcategories', ['sanitize_callback' => 'ka4wp_settings_validate_integrations']);
+		register_setting('ka4wp_settings_integrations', 'ka4wp_api_receive_impartingareas', ['sanitize_callback' => 'ka4wp_settings_validate_integrations']);
+		register_setting('ka4wp_settings_integrations', 'ka4wp_api_receive_impartingareas_recurrence', ['sanitize_callback' => 'ka4wp_settings_validate_integrations']);
+		register_setting('ka4wp_settings_integrations', 'ka4wp_api_keep_deleted_impartingareas', ['sanitize_callback' => 'ka4wp_settings_validate_integrations']);
+		register_setting('ka4wp_settings_integrations', 'ka4wp_api_receive_partners', ['sanitize_callback' => 'ka4wp_settings_validate_integrations']);
+		register_setting('ka4wp_settings_integrations', 'ka4wp_api_receive_partners_recurrence', ['sanitize_callback' => 'ka4wp_settings_validate_integrations']);
+		register_setting('ka4wp_settings_integrations', 'ka4wp_api_keep_deleted_partners', ['sanitize_callback' => 'ka4wp_settings_validate_integrations']);
+		register_setting('ka4wp_settings_miscellaneous', 'ka4wp_prevent_deletion', ['sanitize_callback' => 'ka4wp_settings_validate_integrations', 'default' => 0, 'type' => 'integer']);
 		
 		add_settings_section(
 				'ka4wp_settings_section_integrations', // section ID
@@ -996,7 +996,7 @@ class KA4WP_Admin {
 		$output .= '<option value="-1" '.selected('-1', $option, false).'>'.esc_html__('DISABLED', 'kultur-api-for-wp').'</option>';
 			foreach($posts as $post)
 			{
-				$output .= '<option value="'.esc_attr($post->ID).'" '.selected($post->ID, $option, false).'>'.esc_attr($post->post_title).'</option>';
+				$output .= '<option value="'.$post->ID.'" '.selected($post->ID, $option, false).'>'.esc_attr($post->post_title).'</option>';
 			}
 		$output .= '</select>';
 		
@@ -1044,15 +1044,15 @@ class KA4WP_Admin {
 	public function ka4wp_settings_validate_integrations($input) {
 
 		#TODO: Check in later releases if posts stil exist
-		$input['api_receive_eventcategories'] = ('publish' !== get_post_status(sanitize_text_field($input['api_receive_eventcategories']))) ? '-1' : sanitize_text_field($input['api_receive_eventcategories']);
+		$input['api_receive_eventcategories'] = ('publish' !== get_post_status(absint($input['api_receive_eventcategories']))) ? '-1' : sanitize_text_field($input['api_receive_eventcategories']);
 		
 		$input['api_receive_eventcategories_recurrence'] = in_array($input['api_receive_eventcategories_recurrence'], ['hourly', 'twicedaily', 'daily', 'weekly']) ? sanitize_text_field($input['api_receive_eventcategories_recurrence']) : 'daily';
 		
-		$input['api_receive_impartingareas'] = ('publish' !== get_post_status(sanitize_text_field($input['api_receive_impartingareas']))) ? '-1' : sanitize_text_field($input['api_receive_impartingareas']);
+		$input['api_receive_impartingareas'] = ('publish' !== get_post_status(absint($input['api_receive_impartingareas']))) ? '-1' : sanitize_text_field($input['api_receive_impartingareas']);
 		
 		$input['api_receive_impartingareas_recurrence'] = in_array($input['api_receive_impartingareas_recurrence'], ['hourly', 'twicedaily', 'daily', 'weekly']) ? sanitize_text_field($input['api_receive_impartingareas_recurrence']) : 'daily';
 		
-		$input['api_receive_partners'] = ('publish' !== get_post_status(sanitize_text_field($input['api_receive_partners']))) ? '-1' : sanitize_text_field($input['api_receive_partners']);
+		$input['api_receive_partners'] = ('publish' !== get_post_status(absint($input['api_receive_partners']))) ? '-1' : sanitize_text_field($input['api_receive_partners']);
 		
 		$input['api_receive_partners_recurrence'] = in_array($input['api_receive_partners_recurrence'], ['hourly', 'twicedaily', 'daily', 'weekly']) ? sanitize_text_field($input['api_receive_partners_recurrence']) : 'daily';
 		
@@ -1070,16 +1070,15 @@ class KA4WP_Admin {
 		$options = [];
 		if(!empty($post_id))
 		{
-			$postid = sanitize_text_field($post_id);
-			$options['ka4wp_api_type'] = get_post_meta($postid,'ka4wp_api_type',true);
-			$options['ka4wp_api_key'] = get_post_meta($postid,'ka4wp_api_key',true);
-			$options['ka4wp_base_url'] = get_post_meta($postid,'ka4wp_base_url',true);
-			$options['ka4wp_basic_auth'] = get_post_meta($postid,'ka4wp_basic_auth',true);
-			$options['ka4wp_bearer_auth'] = get_post_meta($postid,'ka4wp_bearer_auth',true);
-			$options['ka4wp_input_type'] = get_post_meta($postid,'ka4wp_input_type',true);
-			$options['ka4wp_method'] = get_post_meta($postid,'ka4wp_method',true);
-			$options['ka4wp_form_field'] = get_post_meta($postid,'ka4wp_form_field',true);
-			$options['ka4wp_header_request'] = get_post_meta($postid,'ka4wp_header_request',true);
+			$options['ka4wp_api_type'] = get_post_meta(absint($post_id),'ka4wp_api_type',true);
+			$options['ka4wp_api_key'] = get_post_meta(absint($post_id),'ka4wp_api_key',true);
+			$options['ka4wp_base_url'] = get_post_meta(absint($post_id),'ka4wp_base_url',true);
+			$options['ka4wp_basic_auth'] = get_post_meta(absint($post_id),'ka4wp_basic_auth',true);
+			$options['ka4wp_bearer_auth'] = get_post_meta(absint($post_id),'ka4wp_bearer_auth',true);
+			$options['ka4wp_input_type'] = get_post_meta(absint($post_id),'ka4wp_input_type',true);
+			$options['ka4wp_method'] = get_post_meta(absint($post_id),'ka4wp_method',true);
+			$options['ka4wp_form_field'] = get_post_meta(absint($post_id),'ka4wp_form_field',true);
+			$options['ka4wp_header_request'] = get_post_meta(absint($post_id),'ka4wp_header_request',true);
 		}
 
 		return $options;
@@ -1098,10 +1097,10 @@ class KA4WP_Admin {
 				switch(sanitize_text_field($_POST['ka4wp_api_type']))
 				{
 					default:
-						$options['ka4wp_api_key'] = sanitize_text_field($_POST['ka4wp_api_key']) ?? '';
+						$options['ka4wp_api_key'] = sanitize_text_field($_POST['ka4wp_api_key']) ?: '';
 					break;
 					case 'wunsch.events':
-						$options['ka4wp_api_key'] = sanitize_text_field($_POST['ka4wp_api_key']) ?? '';
+						$options['ka4wp_api_key'] = sanitize_text_field($_POST['ka4wp_api_key']) ?: '';
 					break;
 					case 'other':
 						$options['ka4wp_base_url'] = sanitize_url($_POST['ka4wp_base_url']);
@@ -1116,7 +1115,7 @@ class KA4WP_Admin {
 				#TODO: validate fields after submit
 				
 				foreach($options as $options_key => $options_value){
-					$response = update_post_meta(sanitize_text_field($post_id), $options_key, $options_value );
+					$response = update_post_meta(absint($post_id), $options_key, $options_value );
     			}
 				if($response){
 					$status = 'true';
@@ -1149,7 +1148,7 @@ class KA4WP_Admin {
 	 */
 	public function add_contact_form_API_properties($properties, $contact_form) {
 
-		$properties["ka4wp_api_integrations"] = get_post_meta(sanitize_text_field($contact_form->id()), '_ka4wp_api_integrations', true);
+		$properties["ka4wp_api_integrations"] = get_post_meta(absint($contact_form->id()), '_ka4wp_api_integrations', true);
 		return $properties;
 	}
 	
@@ -1194,7 +1193,7 @@ class KA4WP_Admin {
 			}
 		}
 		
-		wp_send_json(['mappings' => $predefinedMappings, 'api_type' => get_post_meta(sanitize_text_field($_POST['post_id']), 'ka4wp_api_type', true) ?: 'none', 'predefined' => $typeValues['options'] ? 1 : 0]);
+		wp_send_json(['mappings' => $predefinedMappings, 'api_type' => get_post_meta(absint($_POST['post_id']), 'ka4wp_api_type', true) ?: 'none', 'predefined' => $predefinedMappings ? 1 : 0]);
 	}
 	
 	/**
@@ -1215,7 +1214,7 @@ class KA4WP_Admin {
 			}
 		}
 		
-		wp_send_json(['mappings' => $predefinedMappings ?? []]);
+		wp_send_json(['mappings' => $predefinedMappings]);
 	}
 	
 	/**
@@ -1265,8 +1264,7 @@ class KA4WP_Admin {
 						],
 					'submit_organisationmember' => [
 							'name' => esc_html__('Register as a organization member', 'kultur-api-for-wp'), 
-							'description' => esc_html__('Interface for creating new members in the organization.', 'kultur-api-for-wp'),  
-							'endpoint_path' => '/culturegroup/create',  
+							'description' => esc_html__('Interface for creating new members in the organization.', 'kultur-api-for-wp'),   
 							'endpoint_path' => '/organizationmember/create', 
 							'options' => [
 								['name' => 'Vorname', 'value' => 'firstname'],
@@ -1389,7 +1387,7 @@ class KA4WP_Admin {
 			{	
 				if(!empty($uploaded_files[$form_fields_value->raw_name]))
 				{
-					$api_values[$api_settings['mapping-'.$form_fields_value->raw_name]] = $posted_data['files'][$key] ?? [];
+					$api_values[$api_settings['mapping-'.$form_fields_value->raw_name]] = $posted_data['files'][$key] ?? []; #TODO: $key prüfen
 				} else {
 					$api_values[$api_settings['mapping-'.$form_fields_value->raw_name]] = $posted_data[$form_fields_value->raw_name] ?? '';
 				}
@@ -1402,7 +1400,7 @@ class KA4WP_Admin {
 			return; #TODO: Implement logging
 		}
 		
-		self::ka4wp_send_lead($wpcf7_api_data["apiendpoint"], $wpcf7_api_data["predefined-mapping"] ?? '', $api_values, $posted_data = []);
+		self::ka4wp_send_lead($wpcf7_api_data["apiendpoint"], $wpcf7_api_data["predefined-mapping"] ?? '', $api_values, $posted_data = []); #TODO: $wpcf7_api_data is missing
 		
 		// delete uploaded files
 		if(!empty($uploaded_files)){
@@ -1460,7 +1458,7 @@ class KA4WP_Admin {
 	 */
 	public static function ka4wp_send_lead($post_id, $api_action='', $data = [], $post_data = []){
 		
-		$postid = sanitize_text_field($post_id);
+		$postid = absint($post_id);
 		if('publish' !== get_post_status($postid)){
 			return ['success' => false, 'error' => esc_html__('The selected API is not yet published.', 'kultur-api-for-wp')];
 		}
@@ -1506,7 +1504,7 @@ class KA4WP_Admin {
       	}
       
       	if(!empty($api_options['bearer_auth'])){
-    		$args['headers']['Authorization'] = 'Bearer ' . $bearer_auth;
+    		$args['headers']['Authorization'] = 'Bearer ' . $api_options['bearer_auth'];
       	}
 
 		if($api_options['http_method'] == 'GET'){
