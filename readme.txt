@@ -4,8 +4,8 @@ Donate link: https://kulturwunsch.de/spenden/
 Tags: contact form, api, events, culture, multilingual
 Requires at least: 6.3
 Requires PHP: 7.4
-Tested up to: 6.6
-Stable tag: 1.1.1
+Tested up to: 6.7
+Stable tag: 1.3.1
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 Demo URI: https://tastewp.com/new?pre-installed-plugin-slug=contact-form-7%2Ckultur-api-for-wp&redirect=edit.php%3Fpost_type%3Dka4wp%26page%3Dka4wp_settings&ni=true
@@ -19,9 +19,10 @@ Kultur-API is a comprehensive plugin for your website. It is aimed in particular
 It currently includes the following functions:
 
 * Manage categories for events
-* Manage imparting areas
-* Include both in Contact Form 7 as dynamic fields
-* Fetch both via API (at the moment from WUNSCH.events only)
+* Manage imparting Areas
+* Manage partners
+* Include categories and areas in Contact Form 7 as dynamic fields
+* Fetch all of them via API (at the moment from WUNSCH.events only)
 
 Also some new features are planned:
 
@@ -39,9 +40,9 @@ It is hard to continue development and support for this free plugin without cont
 
 With the standard configuration, this plugin does not store any personal data. Depending on your settings, transaction logs may contain personal information.
 
-= Recommended plugins =
+= Required plugins =
 
-The following plugins are recommended for fully Kultur-API integration:
+The following plugins are required for fully Kultur-API integration:
 
 * [Contact Form 7](https://wordpress.org/plugins/contact-form-7/) by Takayuki Miyoshi - With Contact Form 7 you are able to create smart and flexible contact forms.
 
@@ -60,8 +61,34 @@ For basic usage, have a look at the [plugin's website](https://kulturwunsch.de/)
 
 == Screenshots ==
 
+1. Manage settings in foer categories.
+
+2. Manage API options in the contact form 7 configuration inside a new custom tab.
+
+3. The admin menu bar.
+
+4. Add new WUNSCH.events API.
+
+5. Manage event categories, partners and imparting areas via custom taxonomy.
+
+6. Display existing partners as grid via shortcode.
 
 == Changelog ==
+
+= 1.3.0 =
+
+- translations for languag strings in admin-js are added
+- The Plugin is now registered for WP Consent Api usage
+- adding more Options to configure Partner grid (take at look at our Github documentation)
+- some code improvements
+- change: mapping for external entries intaxoomies changed vom displayname to external_id
+- fix: some Translation issues were fixed
+- fix: the partner api was not correct planned on (de)activation
+
+= 1.2.0 =
+
+- fix: Event categories will now correct synched
+- new: Support for sync and manage partners
 
 = 1.1.1 =
 

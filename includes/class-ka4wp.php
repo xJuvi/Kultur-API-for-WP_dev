@@ -65,6 +65,8 @@ class KA4WP {
 	 * the public-facing side of the site.
 	 *
 	 * @since    1.0.0
+	 *
+	 * @return void
 	 */
 	public function __construct() {
 		if ( defined( 'KA4WP_VERSION' ) ) {
@@ -78,7 +80,6 @@ class KA4WP {
 		$this->set_locale();
 		$this->define_admin_hooks();
 		$this->define_public_hooks();
-
 	}
 
 	/**
@@ -97,6 +98,8 @@ class KA4WP {
 	 *
 	 * @since    1.0.0
 	 * @access   private
+	 *
+	 * @return void
 	 */
 	private function load_dependencies() {
 
@@ -134,14 +137,14 @@ class KA4WP {
 	 *
 	 * @since    1.0.0
 	 * @access   private
+	 *
+	 * @return void
 	 */
 	private function set_locale() {
 
 		$plugin_i18n = new KA4WP_i18n();
 
 		$this->loader->add_action( 'plugins_loaded', $plugin_i18n, 'load_plugin_textdomain' );
-		#$this->loader->add_action( 'init', $plugin_i18n, 'load_plugin_textdomain' );
-
 	}
 
 	/**
@@ -150,6 +153,8 @@ class KA4WP {
 	 *
 	 * @since    1.0.0
 	 * @access   private
+	 *
+	 * @return void
 	 */
 	private function define_admin_hooks() {
 
@@ -161,12 +166,15 @@ class KA4WP {
 		$this->loader->add_action('init', $plugin_admin,'ka4wp_custom_post_type', 10);
 		$this->loader->add_action('init', $plugin_admin,'ka4wp_register_eventcategories_taxonomy', 15);
 		$this->loader->add_action('init', $plugin_admin,'ka4wp_register_impartingareas_taxonomy', 15);
+		$this->loader->add_action('init', $plugin_admin,'ka4wp_register_partners_taxonomy', 15);
 		$this->loader->add_action('admin_init', $plugin_admin,'ka4wp_register_settings');
 		$this->loader->add_action('save_post_ka4wp',$plugin_admin,'ka4wp_update_API_settings', 10, 3);
 		$this->loader->add_action('admin_menu', $plugin_admin, 'ka4wp_register_submenu', 90);
 		$this->loader->add_action('admin_init', $plugin_admin, 'ka4wp_update_plugin', 5);
 		$this->loader->add_action('add_meta_boxes', $plugin_admin,'ka4wp_metabox');
 		$this->loader->add_action('wpcf7_before_send_mail',$plugin_admin,'ka4wp_prepare_formdata_for_api');
+		$this->loader->add_action('created_partners',$plugin_admin,'ka4wp_save_custom_taxonomy_partners');
+		$this->loader->add_action('edited_partners',$plugin_admin,'ka4wp_save_custom_taxonomy_partners');
 		
 		$this->loader->add_action('add_option_ka4wp_api_receive_eventcategories',$plugin_admin,'ka4wp_create_settings_api_receive_eventcategories', 10, 1);
 		$this->loader->add_action('update_option_ka4wp_api_receive_eventcategories',$plugin_admin,'ka4wp_update_settings_api_receive_eventcategories', 10, 2);
@@ -177,6 +185,11 @@ class KA4WP {
 		$this->loader->add_action('add_option_ka4wp_api_receive_impartingareas_recurrence',$plugin_admin,'ka4wp_create_settings_api_receive_impartingareas_recurrence', 10, 1);
 		$this->loader->add_action('update_option_ka4wp_api_receive_impartingareas_recurrence',$plugin_admin,'ka4wp_update_settings_api_receive_impartingareas_recurrence', 10, 2);
 		
+		$this->loader->add_action('add_option_ka4wp_api_receive_partners',$plugin_admin,'ka4wp_create_settings_api_receive_partners', 10, 1);
+		$this->loader->add_action('update_option_ka4wp_api_receive_partners',$plugin_admin,'ka4wp_update_settings_api_receive_partners', 10, 2);
+		$this->loader->add_action('add_option_ka4wp_api_receive_partners_recurrence',$plugin_admin,'ka4wp_create_settings_api_receive_partners_recurrence', 10, 1);
+		$this->loader->add_action('update_option_ka4wp_api_receive_partners_recurrence',$plugin_admin,'ka4wp_update_settings_api_receive_partners_recurrence', 10, 2);
+		
 		$this->loader->add_action('wp_ajax_ka4wp_get_selected_endpoint',$plugin_admin,'ka4wp_get_selected_endpoint',10);
 		$this->loader->add_action('wp_ajax_ka4wp_get_predefined_mapping',$plugin_admin,'ka4wp_get_predefined_mapping',10);
 
@@ -184,12 +197,14 @@ class KA4WP {
 		#CRON
 		$this->loader->add_action('ka4wp_cron_api_update_eventcategories',$plugin_admin,'ka4wp_api_request_update_eventcategories', 5);
 		$this->loader->add_action('ka4wp_cron_api_update_impartingareas',$plugin_admin,'ka4wp_api_request_update_impartingareas', 5);
+		$this->loader->add_action('ka4wp_cron_api_update_partners',$plugin_admin,'ka4wp_api_request_update_partners', 5);
 		
 		$this->loader->add_filter('plugin_action_links',$plugin_admin,'ka4wp_add_settings_link',10,2);
         $this->loader->add_filter('wpcf7_editor_panels',$plugin_admin,'ka4wp_cf7_add_api_integration', 1, 1); // adds another tab to contact form 7 screen
         $this->loader->add_filter('wpcf7_skip_mail',$plugin_admin,'ka4wp_check_skip_mail', 10, 2);
 		$this->loader->add_action("wpcf7_save_contact_form",$plugin_admin,'save_contact_form_API_details', 10, 1); //save contact form api integrations
         $this->loader->add_filter("wpcf7_contact_form_properties",$plugin_admin,'add_contact_form_API_properties', 10, 2); // add contact form properties
+        $this->loader->add_filter("partners_edit_form_fields",$plugin_admin,'ka4wp_edit_taxonomy_partners', 10, 2);
 	}
 
 	/**
@@ -198,6 +213,8 @@ class KA4WP {
 	 *
 	 * @since    1.0.0
 	 * @access   private
+	 *
+	 * @return void
 	 */
 	private function define_public_hooks() {
 
@@ -206,13 +223,16 @@ class KA4WP {
 		$this->loader->add_action('wp_enqueue_scripts', $plugin_public, 'enqueue_styles');
 		$this->loader->add_action('wp_enqueue_scripts', $plugin_public, 'enqueue_scripts');
 		$this->loader->add_action('wpcf7_form_tag_data_option', $plugin_public, 'ka4wP_load_cf7_custom_options', 10, 3); // load taxonomy for select/checkbox/radio elements
-
+		
+		add_shortcode( 'ka4wp_partners', [$plugin_public, 'ka4wp_load_shortcode_partners'] );
 	}
 
 	/**
 	 * Run the loader to execute all of the hooks with WordPress.
 	 *
 	 * @since    1.0.0
+	 *
+	 * @return void
 	 */
 	public function run() {
 		$this->loader->run();
@@ -233,6 +253,7 @@ class KA4WP {
 	 * The reference to the class that orchestrates the hooks with the plugin.
 	 *
 	 * @since     1.0.0
+	 *
 	 * @return    KA4WP_Loader    Orchestrates the hooks of the plugin.
 	 */
 	public function get_loader() {
@@ -243,6 +264,7 @@ class KA4WP {
 	 * Retrieve the version number of the plugin.
 	 *
 	 * @since     1.0.0
+	 *
 	 * @return    string    The version number of the plugin.
 	 */
 	public function get_version() {
@@ -253,6 +275,9 @@ class KA4WP {
 	 * Save debug logs
 	 *
 	 * @since     1.0.0
+	 * @param string $content Value to be logged
+	 *
+	 * @return void
 	 */
 	public static function debug_log($content) {
 		
@@ -266,6 +291,8 @@ class KA4WP {
 	 * Retrieve the all current Post API metadata
 	 *
 	 * @since     1.0.0
+	 * @param int|string $post_id Id of the given post
+	 *
 	 * @return    array
 	 */
 	public function ka4wp_get_api_options($post_id) {
@@ -283,8 +310,6 @@ class KA4WP {
 			$options['ka4wp_method'] = get_post_meta($post_id,'ka4wp_method',true);
 			$options['ka4wp_form_field'] = get_post_meta($post_id,'ka4wp_form_field',true);
 			$options['ka4wp_header_request'] = get_post_meta($post_id,'ka4wp_header_request',true);
-			
-			#$options = get_post_meta($post->ID);
 		}
 
 		return $options;
